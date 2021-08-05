@@ -1,0 +1,23 @@
+#chat-title {
+    display: grid;
+    grid: 36px / 1fr 60px;
+    align-content: center;
+    align-items: center;
+    grid-area: chat-title;
+    background: #eee;
+    color: #3498db;
+    font-weight: bold;
+    font-size: 2.0rem;
+    border-radius: 0 10px 0 0;
+    box-shadow: 0 1px 3px -1px rgba(0,0,0,0.75);
+    padding: 0 20px;
+}
+
+.notification {
+    display: flex;
+    border-radius: 10;
+}
+#icon {
+    display: flex;
+    justify-content: space-around;
+}
