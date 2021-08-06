@@ -6615,11 +6615,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Training\\BaatCheet\\DataAccesslayer\\DataAccessLayer.csproj",
+      "projectUniqueName": "D:\\Training\\ChatApplication\\BaatCheet\\DataAccesslayer\\DataAccessLayer.csproj",
       "projectName": "DataAccessLayer",
-      "projectPath": "D:\\Training\\BaatCheet\\DataAccesslayer\\DataAccessLayer.csproj",
+      "projectPath": "D:\\Training\\ChatApplication\\BaatCheet\\DataAccesslayer\\DataAccessLayer.csproj",
       "packagesPath": "C:\\Users\\FawwadAhmed\\.nuget\\packages\\",
-      "outputPath": "D:\\Training\\BaatCheet\\DataAccesslayer\\obj\\",
+      "outputPath": "D:\\Training\\ChatApplication\\BaatCheet\\DataAccesslayer\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\FawwadAhmed\\AppData\\Roaming\\NuGet\\NuGet.Config",

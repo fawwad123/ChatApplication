@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "dIGLvoPcfYhAI/EDhiUcBG7O6GBclz2Lff/Qlj+5KqmrBIB3ywKXKq26psPZA8f+AQi7lxE+rbu/lUvtkBWFtA==",
+  "dgSpecHash": "HlclyHVqfVNC07xbaacP9OwmIuvPJa6M2xsY1NpXO/jnY+KjzXi1wSeDv2gE1RdMXJtOlCc+3X3Iymybpe9IOA==",
   "success": true,
-  "projectFilePath": "D:\\Training\\BaatCheet\\BusinessLogicLayer\\BusinessLogicLayer.csproj",
+  "projectFilePath": "D:\\Training\\ChatApplication\\BaatCheet\\BusinessLogicLayer\\BusinessLogicLayer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\automapper\\10.1.1\\automapper.10.1.1.nupkg.sha512",
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",

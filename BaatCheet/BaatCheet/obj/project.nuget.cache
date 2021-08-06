@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tB7VYmpkUDTQk3hVceLVqvKuv5gWBMYUSfGR8UpoJIUKDZgN4t1FIr3umWKxLZDxIquwqe4cpkcpBcVMMGmZYg==",
+  "dgSpecHash": "7m7Dbd2yrqdyKOl3eMb1L2rgAqocpxQypzFlfSfeB2e50F39b/BELkxDNT8nL2G+Ok43HNczDmxHvg/RHy3Hkg==",
   "success": true,
-  "projectFilePath": "D:\\Training\\BaatCheet\\BaatCheet\\BaatCheet.csproj",
+  "projectFilePath": "D:\\Training\\ChatApplication\\BaatCheet\\BaatCheet\\BaatCheet.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\automapper\\10.1.1\\automapper.10.1.1.nupkg.sha512",
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
