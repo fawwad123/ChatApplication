@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "7m7Dbd2yrqdyKOl3eMb1L2rgAqocpxQypzFlfSfeB2e50F39b/BELkxDNT8nL2G+Ok43HNczDmxHvg/RHy3Hkg==",
+  "dgSpecHash": "AWjkHoDcYhBbwUwCHrW4lwMmSGKj8SK9pb2U9m6KSfjtg35NKtK383ubF29LRPWJjMNF8zQlK8SBvhNpBMBH9Q==",
   "success": true,
   "projectFilePath": "D:\\Training\\ChatApplication\\BaatCheet\\BaatCheet\\BaatCheet.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\automapper\\10.1.1\\automapper.10.1.1.nupkg.sha512",
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
+    "C:\\Users\\FawwadAhmed\\.nuget\\packages\\mediatr\\9.0.0\\mediatr.9.0.0.nupkg.sha512",
+    "C:\\Users\\FawwadAhmed\\.nuget\\packages\\mediatr.extensions.microsoft.dependencyinjection\\9.0.0\\mediatr.extensions.microsoft.dependencyinjection.9.0.0.nupkg.sha512",
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.2.0\\microsoft.aspnetcore.authentication.2.2.0.nupkg.sha512",
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\FawwadAhmed\\.nuget\\packages\\microsoft.aspnetcore.authentication.cookies\\2.2.0\\microsoft.aspnetcore.authentication.cookies.2.2.0.nupkg.sha512",

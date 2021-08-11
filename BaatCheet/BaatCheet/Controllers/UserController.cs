@@ -1,9 +1,8 @@
-﻿using BusinessLogicLayer;
+﻿using BaatCheet.Features.ChatFeatures.Commands;
+using BusinessLogicLayer;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BaatCheet.Controllers
@@ -14,46 +13,44 @@ namespace BaatCheet.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserBLL userBLL;
-        public UserController()
+        private readonly IMediator mediator;
+        public UserController(IMediator mediator)
         {
+            this.mediator = mediator;
             this.userBLL = new UserBLL();
         }
-        [HttpPost]
+
+        /*[HttpPost]
         [Route("addNewContact")]
-        public ActionResult AddNewContact(string email, string userId, [FromHeader] string authorization)
+        public async Task<ActionResult> AddNewContact(string email, int userId, [FromHeader] string authorization)
         {
-            var message = "";
-            object user = userBLL.AddNewContact(email, userId, authorization, ref message);
-
-            if (message == "UnAuthorized user")
-                return Unauthorized(message);
-            else if (message == "User added successfully")
-                return Ok(user);
+            var response = await mediator.Send(new AddNewContact.Query(email, userId, authorization));
+            if (response.Message == "UnAuthorized user")
+                return Unauthorized(response.Message);
+            else if (response.Message == "User added successfully")
+                return Ok(response.User);
             else
-                return Ok(message);
-        }
-        [HttpPost]
+                return Ok(response.Message);
+        }*/
+        /*[HttpPost]
         [Route("addNewGroup")]
-        public ActionResult AddNewGroup(string groupName, string userId, [FromHeader] string authorization)
+        public async Task<ActionResult> AddNewGroup(string groupName, string userId, [FromHeader] string authorization)
         {
-            var message = "";
-            object user = userBLL.AddNewGroup(groupName, userId, authorization, ref message);
+            var response = await mediator.Send(new AddNewGroup.Query(groupName, userId, authorization));
+            if (response.Message == "UnAuthorized user")
+                return Unauthorized(response.Message);
+            return Ok(response.User);
+        }*/
 
-            if (message == "UnAuthorized user")
-                return Unauthorized(message);
-            return Ok(user);
-        }
-
-        [HttpPost]
+        /*[HttpPost]
         [Route("addUserToGroup")]
-        public ActionResult AddUserToGroup(string email, string userId, string groupId, [FromHeader] string authorization)
+        public async Task<ActionResult> AddUserToGroup(string email, string userId, string groupId, [FromHeader] string authorization)
         {
-            var message = "";
-            userBLL.AddUserToGroup(email, userId, groupId, authorization, ref message);
+            var response = await mediator.Send(new AddUserToGroup.Query(email, userId, groupId, authorization));
 
-            if (message == "UnAuthorized user")
-                return Unauthorized(message);
-            return Ok(message);
-        }
+            if (response.Message == "UnAuthorized user")
+                return Unauthorized(response.Message);
+            return Ok(response.Message);
+        }*/
     }
 }

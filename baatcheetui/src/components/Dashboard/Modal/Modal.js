@@ -1,19 +1,15 @@
 import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Modal from 'react-modal';
 import Loader from "react-loader-spinner";
 import './Modal.scss'
-import { addContactToGroup, addNewContact, addNewGroup } from '../../../api/userApi';
-import { getUserPending, getUserSuccess, getUserFailed, getUserResponse } from '../../../slice/userSlice';
 
 Modal.setAppElement('#root')
 const CustomModal = (props) => {
     const {user, isLoadingUser} = useSelector((state) => state.user)
     const [value, setValue] = useState("");
     const [error, setError] = useState("");
-    const [message, setMessage] = useState("");
-    const dispatch = useDispatch();
-    const {modalIsOpen, setModalIsOpen, isContact, addContact} = props
+    const {modalIsOpen, setModalIsOpen, isContact, addContact, addContactToGroup, addNewContact, addNewGroup, setModalMessage, modalMessage, selectedId} = props
     const customStyles = {
         content: {
           top: '50%',
@@ -25,32 +21,24 @@ const CustomModal = (props) => {
         },
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async () => {
         try {
+            var err = validate(value)
             setError(validate(value))
-            if(error === ""){
-                dispatch(getUserPending())
-                var response
-                if(isContact)
-                    response = await addNewContact({email: value, userId: user.person.id});
-                else
-                    if(addContact)
-                        response = await addContactToGroup({email: value, userId: user.person.id, groupId: sessionStorage.getItem('groupId')})
-                    else
-                        response = await addNewGroup({groupName: value, userId: user.person.id});
-
-                if(response.data && response.data.person){
-                    isContact ? setMessage("User added successfully") : setMessage("Group created successfully")
-                    return dispatch(getUserSuccess(response.data));
+            if(err === "" && value !== ""){
+                if(isContact){
+                    await addNewContact({email: value, userId: user.person.id});
                 }
                 else{
-                    setMessage(response.data)
-                    return dispatch(getUserResponse())
+                    if(addContact)
+                        await addContactToGroup({email: value, addedBy: user.person.id, groupId: selectedId})
+                    else
+                        await addNewGroup({name: value, createdBy: user.person.id});
                 }
+                    
             }
         } catch (error) {
             console.error(error);
-            dispatch(getUserFailed(error))
         }
     };
 
@@ -60,7 +48,7 @@ const CustomModal = (props) => {
 
     const validate = (value) => {
         let errors = '';
-        if(isContact){
+        if(isContact || addContact){
             if (value === "") 
                 errors = 'Email address is required';
             else if (!/\S+@\S+\.\S+/.test(value)) 
@@ -75,8 +63,8 @@ const CustomModal = (props) => {
 
     if(!modalIsOpen && error !== '')
         setError("");
-    if(!modalIsOpen && message !== '')
-        setMessage("")
+    if(!modalIsOpen && modalMessage !== '')
+        setModalMessage("")
     if(!modalIsOpen && value !== '')
         setValue("")
 
@@ -118,8 +106,8 @@ const CustomModal = (props) => {
                         value={value} 
                         onChange={(e) => handleChange(e)} />
                     }
-                    {error && ( <p className="alert alert-danger"><strong>{error}</strong></p>)}
-                    {message && ( <p className="alert alert-success"><strong>{message}</strong></p>)}
+                    {error && ( <p className="alert alert-danger" style={{alignSelf:'center'}}><strong>{error}</strong></p>)}
+                    {modalMessage && ( <p className="alert alert-success" style={{alignSelf:'center'}}><strong>{modalMessage}</strong></p>)}
                 </div>
                 <div className="footer">
                 {isLoadingUser ? <Loader type="Puff" color="#00BFFF" height={50}  width={50} /> : ''}

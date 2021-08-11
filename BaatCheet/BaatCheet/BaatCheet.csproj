@@ -20,4 +20,9 @@
     <ProjectReference Include="..\BusinessLogicLayer\BusinessLogicLayer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\UserFeatures\Commands\" />
+    <Folder Include="Features\UserFeatures\Queries\" />
+  </ItemGroup>
+
 </Project>

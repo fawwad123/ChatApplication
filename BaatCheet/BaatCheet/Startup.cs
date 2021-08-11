@@ -1,6 +1,7 @@
 using BaatCheet.Hubs;
 using DataAccessLayer.Common;
 using DataAccessLayer.Repository;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,8 +12,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using System;
-using System.Net.WebSockets;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace BaatCheet
@@ -32,6 +34,7 @@ namespace BaatCheet
             var KEY = "This is my test key";
             services.AddControllers();
             services.AddSignalR();
+            /*services.AddSingleton<BaatCheetDbContext>();*/
             services.AddDbContext<BaatCheetDbContext>();
             services.AddMvc(option =>  option.EnableEndpointRouting = false)
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
@@ -69,6 +72,9 @@ namespace BaatCheet
                    .AllowCredentials();
                 });
             });
+            /*services.AddMediatR(Assembly.GetExecutingAssembly());*/
+            services.AddMediatR(typeof(Startup).Assembly);
+            services.AddSingleton<IDictionary<int, string>>(new Dictionary<int, string>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,7 +3,7 @@ import './NewConversation.scss';
 import 'font-awesome/css/font-awesome.min.css';
 
 const NewConversation = (props) => {
-    const {modalIsOpen, setModalIsOpen, setIsContact} = props;
+    const {modalIsOpen, setModalIsOpen, setIsContact, setAddContact} = props;
     return (
         <div id="new-message-container">
             <span 
@@ -12,6 +12,7 @@ const NewConversation = (props) => {
                 onClick={() => {
                     setModalIsOpen(!modalIsOpen)
                     setIsContact(true)
+                    setAddContact(true)
                 }}/>
             <span 
                 className="fa fa-users" 
@@ -19,6 +20,7 @@ const NewConversation = (props) => {
                 onClick={() => {
                     setModalIsOpen(!modalIsOpen)
                     setIsContact(false)
+                    setAddContact(false)
                 }}/>
         </div>
     )

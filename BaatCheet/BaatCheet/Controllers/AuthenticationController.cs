@@ -1,9 +1,10 @@
-﻿using BusinessLogicLayer;
+﻿using BaatCheet.Features.AuthenticationFeatures.Commands;
+using BaatCheet.Features.AuthenticationFeatures.Queries;
 using BusinessLogicLayer.Model;
-using DataAccessLayer.Common;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace BaatCheet.Controllers
 {
@@ -12,42 +13,41 @@ namespace BaatCheet.Controllers
     [Route("api/[controller]")]
     public class AuthenticationController : ControllerBase
     {
-        private readonly AuthenticationBLL authenticationBLL;
-        private readonly IJwtAuthenticationManager jwtAuthenticationManager;
-        public AuthenticationController(IJwtAuthenticationManager jwtAuthenticationManager)
+        /*private readonly IJwtAuthenticationManager jwtAuthenticationManager;*/
+        private readonly IMediator mediator;
+        public AuthenticationController(IMediator mediator)
         {
-            this.authenticationBLL = new AuthenticationBLL();
-            this.jwtAuthenticationManager = jwtAuthenticationManager;
+            this.mediator = mediator;
         }
         [HttpGet]
         [Route("getUserDetails")]
-        public ActionResult<object> GetUserDetails([FromHeader] string authorization)
+        public async Task<ActionResult<object>> GetUserDetails([FromHeader] string authorization)
         {
-            string message = "";
-            object userDetails = authenticationBLL.GetUserDetails(authorization, ref message);
-            if (userDetails != null)
-                return Ok(userDetails);
-            return Unauthorized();
+            var response = await mediator.Send(new GetUserDetails.Query(authorization));
+            if (response.UserDetails == null)
+                return Unauthorized();
+            return Ok(response.UserDetails);
+            
         }
         [AllowAnonymous]
         [HttpPost]
         [Route("registerUser")]
-        public ActionResult RegisterUser([FromBody] UserModel user)
+        public async Task<ActionResult> RegisterUser([FromBody] UserModel user)
         {
-            string status =  authenticationBLL.RegisterUser(user);
-            if (status == "User created")
+            var response = await mediator.Send(new RegisterUser.Query(user));
+            if (response.Status == "User created")
                 return Ok("User created sucessfully");
             return BadRequest("email is already available");
         }
         [AllowAnonymous]
         [HttpPost]
         [Route("authenticateUser")]
-        public ActionResult AuthenticateUser(string email,string password)
+        public async Task<ActionResult> AuthenticateUser(string email,string password)
         {
-            var token =  authenticationBLL.AuthenticateUser(email, password);
-            if (token == null)
+            var response = await mediator.Send(new AuthenticateUser.Query(email, password));
+            if (response == null)
                 return Unauthorized("Invalid email or password");
-            return Ok(token);
+            return Ok(response.Token);
         }
     }
 }

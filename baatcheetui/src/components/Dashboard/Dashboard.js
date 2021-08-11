@@ -20,6 +20,7 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     const {isAuth} = useSelector((state) => state.login);
     const {user} = useSelector((state) => state.user)
+    const [userProfile, setUserProfile] = useState({});
     const [connection, setConnection] = useState(null);
     const [selectedId, setSelectedId] = useState(0);
     const [messages, setMessages] = useState([]);
@@ -30,78 +31,48 @@ const Dashboard = () => {
     const [selectedConversation, setSelectedConversation] = useState("")
     const [isContact, setIsContact] = useState(true)
     const [addContact, setAddContact] = useState(false)
+    const [modalMessage, setModalMessage] = useState("")
     const [searchValue, setSearchValue] = useState("")
     const latestChat = useRef(null);
     latestChat.current = messages;
     
     useEffect(() => {
         document.body.style.display = 'grid'
-        if(sessionStorage.getItem('token'))
+        if(sessionStorage.getItem('token') && user.person === undefined)
             dispatch(getUserProfile());
         else if(sessionStorage.getItem('token') === null && isAuth === false)
             history.push('/');
-        try {
-            
-            const connection = new HubConnectionBuilder()
-            .withUrl('https://localhost:5001/hubs/chathub')
-            .withAutomaticReconnect()
-            .build();
-            
-            connection.start()
-                .then(result => {
-                    console.log('Connected!');
-
-                    connection.on('ReceiveMessage', message => {
-                        const updatedChat = [...latestChat.current];
-                        var userContact = sessionStorage.getItem('userContact');
-                        var group = sessionStorage.getItem('groupId');
-                        var m = updatedChat.map(messages => {
-                            if(messages){
-                                var msgs = Object.assign([], messages.message);
-                                if(message.userContactId == userContact && message.userContactId !== undefined)
-                                    msgs.push(message)
-                                if(message.groupId == group && message.groupId !== undefined)
-                                    msgs.push(message)
-                                messages.message = msgs 
-                                return messages;
-                            }
-                            return null
-                        });
-                        setMessages(m);
-                    });
-                })
-                .catch(e => console.log('Connection failed: ', e));
-            setConnection(connection);
-        } catch (error) {
-            console.log(error)
-        }
-    }, [messages, dispatch, history, isAuth])
+        
+    }, [messages, dispatch, history, isAuth, user.person])
 
     const connectFriend = async (newUserContactId) =>{
         try {
-            if(connection.connectionState === 'Connected')
-                connection.invoke("JoinFriend",userContactId, newUserContactId).catch(err => console.error(err));
+            if(connection !== null && connection.connectionState === 'Connected'){
+                await connection.invoke("JoinFriend",userContactId, newUserContactId).catch(err => console.error(err));
+            }
         }
         catch(e) {
             console.log('Sending message failed.', e);
         }
     }
+
     const connectGroup = async (newGroupId) =>{
         try {
-            if(connection.connectionState === 'Connected')
-                connection.invoke("JoinGroup",groupId, newGroupId).catch(err => console.error(err));
+            if(connection !== null && connection.connectionState === 'Connected')
+                await connection.invoke("JoinGroup",groupId, newGroupId).catch(err => console.error(err));
         }
         catch(e) {
             console.log('Sending message failed.', e);
         }
     }
+    
     const sendMessage = async (message) => {
         try {
             if(connection.connectionState === 'Connected')
                 if(userContactId === -1)
-                    connection.invoke("SendMessageToGroup", message, groupId).catch(err => console.error(err));
+                    await connection.invoke("SendMessageToGroup", message, groupId).catch(err => console.error(err));
                 else
-                    connection.invoke("SendMessageToFriend", message, userContactId).catch(err => console.error(err));
+                    await connection.invoke("SendMessageToFriend", message, userContactId, user.person.id).catch(err => console.error(err));
             setConnection(connection);
         }
         catch(e) {
@@ -109,15 +80,173 @@ const Dashboard = () => {
         }
     }
 
-    const signOut = () => {
+    const signOut = async () => {
         sessionStorage.removeItem('token');
         history.push('/');
         dispatch(clearUser())
+        await connection.stop()
     }
 
-    var conversations, groupConversation;
-    if(user.chatDetails){
-        conversations = user.chatDetails.map((chatDetails) => {
+    var selectConversationIndex = (id) => {
+        setSelectedId(id)
+        setPerson(user.person)
+        setIsContact(true)
+        setAddContact(false)
+        messages[0].map((chatDetails) => {
+            if(id == chatDetails.person.id){
+                setUserContactId(chatDetails.userContactId)
+                setGroupId(-1)
+                setSelectedConversation(chatDetails.person.name)
+                connectFriend(chatDetails.userContactId)
+            }
+        });
+    }
+
+    var selectGroupConversationIndex = (id) => {
+        setSelectedId(id)
+        setPerson(userProfile.person)
+        setIsContact(false)
+        setAddContact(false)
+        messages[1].map((groupDetails) => {
+            if(id == groupDetails.groupId){
+                setUserContactId(-1);
+                setGroupId(groupDetails.groupId)
+                setSelectedConversation(groupDetails.groupName);
+                connectGroup(groupDetails.groupId)
+            }
+        });
+        console.log("Messages", messages)
+    }
+
+    const connectServer = async () => {
+        try {
+            if(connection == null && user.person !== undefined){
+                const connection = new HubConnectionBuilder()
+                .withUrl('https://localhost:5001/hubs/chathub')
+                .withAutomaticReconnect()
+                .build();
+                
+                await connection.start()
+                    .then(result => {
+                        console.log('Connected!');
+                        connection.on('ReceiveMessage', message => {
+                            try {
+                                const updatedChat = [...latestChat.current];
+                                const select = message.groupId === undefined ? true : false;
+                                var m = updatedChat[select ? 0 : 1].map(conversation => {
+                                    var msgs = Object.assign([], select ? conversation.messages : conversation.chats);
+                                    if(conversation && conversation.userContactId == message.userContactId && conversation.userContactId !== undefined){
+                                        msgs.push(message)
+                                        conversation = {...conversation, messages: msgs}
+                                        return conversation;
+                                    }
+                                    if(conversation && conversation.groupId == message.groupId && conversation.groupId !== undefined){
+                                        msgs.push(message)
+                                        conversation = {...conversation, chats: msgs}
+                                        return conversation;
+                                    }
+                                });
+                                
+                                var chat = updatedChat[select ? 0 : 1].map( obj => {
+                                    for(var i in m)
+                                        if(m[i] !== undefined){
+                                            if(select && obj.userContactId === m[i].userContactId) {
+                                                return m[i];
+                                            }
+                                            if(!select && obj.groupId === m[i].groupId) {
+                                                return m[i];
+                                            }
+                                        }
+                                    return obj
+                                })
+                                updatedChat[select ? 0 : 1] = chat
+                                setMessages(updatedChat);
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        });
+                        connection.on('NewGroup', (group, message) => {
+                            try {
+                                const updatedChat = [...latestChat.current];
+                                updatedChat[1].push(group)
+                                setMessages(updatedChat);
+                                setModalMessage(message)
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        })
+                        connection.on('NewContact', (contact, message) =>{
+                            try {
+                                const updatedChat = [...latestChat.current];
+                                updatedChat[0].push(contact)
+                                setMessages(updatedChat);
+                                setModalMessage(message)
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        })
+                        connection.on('NewContactGroup', (group, message) => {
+                            try {
+                                const updatedChat = [...latestChat.current];
+                                var isGroup = false;
+                                var groupChat = updatedChat[1].map(userGroup => {
+                                    if(userGroup.groupId == group.groupId){
+                                        isGroup = true;
+                                        var grpMem = Object.assign([], group.groupMember)
+                                        userGroup = {...userGroup, groupMember: grpMem};
+                                    }
+                                    return userGroup
+                                })
+                                if(isGroup)
+                                    updatedChat[1] = groupChat
+                                else
+                                    updatedChat[1].push(group)
+                                    
+                                setMessages(updatedChat)
+                                setModalMessage(message)
+                                console.log(group);
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        })
+                    })
+                    .catch(e => console.log('Connection failed: ', e));
+                    await connection.invoke("LoginUser",user.person.id).catch(err => console.error(err));
+                    setConnection(connection);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const addNewContact = async (contact) => {
+        await connection.invoke("AddNewContact", contact.email, contact.userId).catch(err => console.error(err));
+    }
+
+    const addContactToGroup = async (contactGroup) => {
+        await connection.invoke("AddContactToGroup", contactGroup.email, contactGroup.addedBy, contactGroup.groupId).catch(err => console.error(err));
+    }
+
+    const addNewGroup = async (group) => {
+        await connection.invoke("AddNewGroup", group.name, group.createdBy).catch(err => console.error(err));
+    }
+
+    connectServer()
+    var contacts, groups, conversations, groupConversation;
+    if(user.person !== undefined && userProfile.person === undefined){
+        setUserProfile(user)
+        contacts = user.chatDetails.map((chatDetails) => {
+            return chatDetails
+        })
+        groups = user.groupDetails.map((groupDetails) => {
+            return groupDetails
+        })
+        
+        setMessages([contacts, groups])
+    
+    }
+    if(messages.length > 0){
+        conversations = messages[0].map((chatDetails) => {
             return(
                 {
                     id: chatDetails.person.id,
@@ -128,10 +257,10 @@ const Dashboard = () => {
                     message: chatDetails.messages.map(a => a.message)
                 }
             )
+            
         });
-    }
-    if(user.groupDetails){
-        groupConversation = user.groupDetails.map((groupDetails) => {
+
+        groupConversation = messages[1].map((groupDetails) => {
             return({
                 id: groupDetails.groupId,
                 imageUrl: daryl,
@@ -142,63 +271,6 @@ const Dashboard = () => {
             })
         })
     }
-    
-    var selectConversationIndex = (id) => {
-        setSelectedId(id)
-        setPerson(user.person)
-        setIsContact(true)
-        setAddContact(false)
-        var messages = user.chatDetails.map((chatDetails) => {
-            if(id == chatDetails.person.id){
-                setUserContactId(chatDetails.userContactId);
-                setGroupId(-1)
-                sessionStorage.setItem('userContact', chatDetails.userContactId);
-                sessionStorage.removeItem('groupId');
-                setSelectedConversation(chatDetails.person.name);
-                connectFriend(chatDetails.userContactId)
-                return(
-                    {
-                        id: chatDetails.person.id,
-                        imageUrl: daryl,
-                        imageAlt: chatDetails.person.name,
-                        message: chatDetails.messages,
-                    }
-                )
-            }
-            return null;
-        });
-        console.log("Messages", messages)
-        setMessages(messages);
-    }
-
-    var selectGroupConversationIndex = (id) => {
-        setSelectedId(id)
-        setPerson(user.person)
-        setIsContact(false)
-        setAddContact(false)
-        var messages = user.groupDetails.map((groupDetails) => {
-            if(id == groupDetails.groupId){
-                setUserContactId(-1);
-                setGroupId(groupDetails.groupId)
-                sessionStorage.setItem('groupId', groupDetails.groupId);
-                sessionStorage.removeItem('userContact');
-                setSelectedConversation(groupDetails.groupName);
-                connectGroup(groupDetails.groupId)
-                return(
-                    {
-                        id: groupDetails.groupId,
-                        imageUrl: daryl,
-                        imageAlt: groupDetails.groupName,
-                        message: groupDetails.chats,
-                    }
-                )
-            }
-            return null;
-        });
-        console.log("Messages", messages)
-        setMessages(messages);
-    }
-
     
     return (
         <>
@@ -212,7 +284,11 @@ const Dashboard = () => {
                 selectedId = {selectedId}
                 searchValue = {searchValue}
             />
-            <NewConversation setModalIsOpen={setModalIsOpen} modalIsOpen={modalIsOpen} setIsContact={setIsContact}/>
+            <NewConversation 
+                setModalIsOpen={setModalIsOpen} 
+                modalIsOpen={modalIsOpen} 
+                setIsContact={setIsContact}
+                setAddContact={setAddContact}/>
             <ChatTitle 
                 selectedConversation = {selectedConversation}
                 signOut = {signOut}
@@ -224,6 +300,8 @@ const Dashboard = () => {
             {messages.length > 0  && selectedId !== 0 ? <MessageList 
                 userId={person ? person.id : null} 
                 messages = {messages}
+                isContact = {isContact}
+                selectedId = {selectedId}
             />:
             <NoConversations 
                 setModalIsOpen={setModalIsOpen} 
@@ -240,7 +318,13 @@ const Dashboard = () => {
             modalIsOpen={modalIsOpen} 
             setModalIsOpen={setModalIsOpen} 
             isContact={isContact}
-            addContact={addContact}/>
+            addContact={addContact}
+            addNewContact={addNewContact}
+            addContactToGroup={addContactToGroup}
+            addNewGroup={addNewGroup}
+            setModalMessage={setModalMessage}
+            modalMessage={modalMessage}
+            selectedId = {selectedId} />
         </>
     )
 }

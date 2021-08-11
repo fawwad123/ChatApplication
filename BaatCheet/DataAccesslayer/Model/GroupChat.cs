@@ -16,7 +16,6 @@ namespace DataAccessLayer.Model
         }
         public int GroupId { get; set; }
         public string GroupName { get; set; }
-        public string Name { get; set; }
         public bool? IsAdmin { get; set; }
         public Person CreatedBy { get; set; }
         public List<Person> GroupMember { get; set; }

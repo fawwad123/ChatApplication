@@ -24,6 +24,8 @@ namespace DataAccessLayer
                 return data.Name;
             }
             return "";
+            /*var hash  =  new GetConversationHashById { Id = userContactId };
+            return "";*/
         }
         public string GetGroupHash(int groupId)
         {
@@ -34,30 +36,59 @@ namespace DataAccessLayer
             }
             return "";
         }
-        public void SaveConversation(Conversation conversation)
+
+        public int GetUserId(int userContactId, int userId)
+        {
+            var query = this.dbContext.UserContacts.Where(x => x.Id == userContactId && (x.UserId == userId || x.ContactId == userId));
+            foreach(var data in query)
+            {
+                if (data.UserId == userId)
+                    return data.ContactId;
+                else
+                    return data.UserId;
+            }
+            return -1;
+        }
+
+        public List<int> GetAllUsersInGroup(int groupId)
+        {
+            var query = this.dbContext.UserGroups.Where(x => x.GroupId == groupId);
+            List<int> userId = new List<int>();
+            foreach(var data in query)
+            {
+                userId.Add(data.UserId);
+            }
+            return userId;
+        }
+
+        public bool SaveConversation(Conversation conversation)
         {
             try
             {
                 this.dbContext.Add(conversation);
                 this.dbContext.SaveChanges();
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return false;
             }
             
         }
 
-        public void SaveGroupConversation(GroupConversation groupConversation)
+        public bool SaveGroupConversation(GroupConversation groupConversation)
         {
             try
             {
                 this.dbContext.Add(groupConversation);
                 this.dbContext.SaveChanges();
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return false;
             }
         }
     }

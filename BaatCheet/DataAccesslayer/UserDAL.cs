@@ -3,10 +3,9 @@ using DataAccessLayer.Entities;
 using DataAccessLayer.Repository;
 using System;
 using System.Linq;
-using System.Net.Http.Headers;
-using Microsoft.EntityFrameworkCore;
 using DataAccessLayer.Model;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DataAccessLayer
 {
@@ -25,51 +24,39 @@ namespace DataAccessLayer
             this.dbContext = new BaatCheetDbContext();
         }
 
-        private static ulong Hash()
+        public GroupChat AddNewGroup(string groupName, int createdBy, ref string message)
         {
-            ulong kind = (ulong)(int)DateTime.Now.Kind;
-            return (kind << 62) | (ulong)DateTime.Now.Ticks;
-        }
-
-        public object AddNewGroup(string groupName, string userId, string token, ref string message)
-        {
-            User user = Security.AuthenticateUser(this.dbContext, int.Parse(userId), token);
-            if (user == null)
-                message = "UnAuthorized user";
-            else
+            try
             {
-                try
+                var hash = Commons.Hash();
+                Group group = new Group
                 {
-                    var hash = Hash();
-                    Group group = new Group
-                    {
-                        Name = groupName,
-                        CreatedBy = int.Parse(userId),
-                        CreatedOn = DateTime.Now,
-                        ModifiedBy = int.Parse(userId),
-                        ModifiedOn = DateTime.Now,
-                        GroupHash = "G-" + Hash(),
-                    };
-                    this.dbContext.Add(group);
-                    this.dbContext.SaveChanges();
+                    Name = groupName,
+                    CreatedBy = createdBy,
+                    CreatedOn = DateTime.Now,
+                    ModifiedBy = createdBy,
+                    ModifiedOn = DateTime.Now,
+                    GroupHash = "G-" + hash,
+                };
+                this.dbContext.Add(group);
+                this.dbContext.SaveChanges();
 
-                    UserGroup userGroup = new UserGroup
-                    {
-                        UserId = int.Parse(userId),
-                        GroupId = group.Id,
-                        IsAdmin = true,
-                    };
-                    this.dbContext.Add(userGroup);
-                    this.dbContext.SaveChanges();
-                    message = "Group created successfully";
-                    return getDetails(user);
-                }
-                catch(Exception ex)
+                UserGroup userGroup = new UserGroup
                 {
-                    return ex.Message;
-                }
+                    UserId = createdBy,
+                    GroupId = group.Id,
+                    IsAdmin = true,
+                };
+                this.dbContext.Add(userGroup);
+                this.dbContext.SaveChanges();
+                message = "Group created successfully";
+
+                return GetGroupDetails(group.Id);
             }
-            return null;
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public string GetUserContactEmail(int userContactId, int messageBy)
@@ -103,40 +90,36 @@ namespace DataAccessLayer
             return email;
         }
 
-        public void AddUserToGroup(string email, string userId, string groupId, string token, ref string message)
+        public GroupChat AddUserToGroup(string email, int userId, int groupId, ref string message)
         {
-            var user = Security.AuthenticateUser(this.dbContext, int.Parse(userId), token);
-            if (user == null)
-                message = "UnAuthorized user";
+            
+            var newUser = this.dbContext.Users.FirstOrDefault(x => x.Email == email);
+            if (newUser == null)
+                message = "No user found";
             else
             {
-                var newUser = this.dbContext.Users.FirstOrDefault(x => x.Email == email);
-                if (newUser == null)
-                    message = "No user found";
+                var newUserGroup = this.dbContext.UserGroups.FirstOrDefault(x => x.UserId == newUser.Id && x.GroupId == groupId);
+                if (newUserGroup != null)
+                    message = "User already available in the group";
                 else
                 {
-                    var newUserGroup = this.dbContext.UserGroups.FirstOrDefault(x => x.UserId == newUser.Id && x.GroupId == int.Parse(groupId));
-                    if (newUserGroup != null)
-                        message = "User already available in the group";
-                    else
+                    var userGroup = new UserGroup
                     {
-                        var userGroup = new UserGroup
-                        {
-                            UserId = newUser.Id,
-                            GroupId = int.Parse(groupId),
-                        };
-                        this.dbContext.Add(userGroup);
-                        this.dbContext.SaveChanges();
+                        UserId = newUser.Id,
+                        GroupId = groupId,
+                    };
+                    this.dbContext.Add(userGroup);
+                    this.dbContext.SaveChanges();
 
-                        message = "User added in the group successfully";
-                    }
+                    message = "User added in the group successfully";
                 }
             }
+            return GetGroupDetails(groupId);
         }
 
-        public object AddNewContact(string email, string userId, string token, ref string message)
+        public UserConversation AddNewContact(string email, int userId, ref string message)
         {
-            User user = Security.AuthenticateUser(this.dbContext, int.Parse(userId), token);
+            User user = this.dbContext.Users.FirstOrDefault(x => x.Id == userId);
             if (user == null)
                 message = "UnAuthorized user";
             else
@@ -146,15 +129,15 @@ namespace DataAccessLayer
                     message = "No user found";
                 else
                 {
-                    var userContact = this.dbContext.UserContacts.FirstOrDefault(x => (x.UserId == int.Parse(userId) && x.ContactId == contact.Id) || (x.ContactId == int.Parse(userId) && x.UserId == contact.Id));
+                    var userContact = this.dbContext.UserContacts.FirstOrDefault(x => (x.UserId == userId && x.ContactId == contact.Id) || (x.ContactId == userId && x.UserId == contact.Id));
                     if (userContact != null)
                         message = "User already added";
                     else
                     {
-                        var hash = Hash();
+                        var hash = Commons.Hash();
                         var newUserContact = new UserContact
                         {
-                            UserId = int.Parse(userId),
+                            UserId = userId,
                             ContactId = contact.Id,
                             IsBlocked = false,
                             Name = "C-" + hash,
@@ -163,14 +146,13 @@ namespace DataAccessLayer
                         this.dbContext.SaveChanges();
 
                         message = "User added successfully";
-                        return getDetails(user);
                     }
                 }
             }
-            return null;
+            return GetUserDetails(email);
         }
 
-        private object getUserGroupDetails(int userId)
+        private object GetUserGroupDetails(int userId)
         {
             List<GroupChat> groupChatList = new List<GroupChat>();
 
@@ -201,13 +183,12 @@ namespace DataAccessLayer
                 GroupChat groupChat = new GroupChat();
                 groupChat.GroupId = userGroup.GroupId;
                 groupChat.GroupName = userGroup.GroupName;
-                groupChat.Name = userGroup.Name;
                 groupChat.CreatedBy.Id = userGroup.CreatedBy.Id;
                 groupChat.CreatedBy.Name = userGroup.CreatedBy.Name;
                 groupChat.CreatedBy.Email = userGroup.CreatedBy.Email;
                 groupChat.CreatedBy.DateOfBirth = userGroup.CreatedBy.DateOfBirth;
-                groupChat = getGroupMembers(groupChat, userGroup.GroupId);
-                groupChat = getGroupConversations(groupChat, userGroup.GroupId);
+                groupChat = GetGroupMembers(groupChat, userGroup.GroupId);
+                groupChat = GetGroupConversations(groupChat, userGroup.GroupId);
                 
                 groupChatList.Add(groupChat);
             }
@@ -215,7 +196,49 @@ namespace DataAccessLayer
             return groupChatList;
         }
 
-        private GroupChat getGroupConversations(GroupChat groupChat, int groupId)
+        private GroupChat GetGroupDetails(int groupId)
+        {
+            GroupChat groupChat = new GroupChat();
+
+            var userGroups = this.dbContext.UserGroups
+                                .Join(
+                                    this.dbContext.Groups,
+                                    userGroups => userGroups.GroupId,
+                                    group => group.Id,
+                                    (userGroups, group) => new
+                                    {
+                                        UserId = userGroups.UserId,
+                                        GroupId = group.Id,
+                                        GroupName = group.Name,
+                                        CreatedBy = new
+                                        {
+                                            Id = group.CreatedByNavigation.Id,
+                                            Name = group.CreatedByNavigation.Name,
+                                            Email = group.CreatedByNavigation.Email,
+                                            DateOfBirth = group.CreatedByNavigation.DateOfBirth
+                                        },
+                                    }
+                                )
+                                .Where(x => x.GroupId == groupId).ToList();
+
+            foreach (var userGroup in userGroups)
+            {
+                groupChat = new GroupChat();
+                groupChat.GroupId = userGroup.GroupId;
+                groupChat.GroupName = userGroup.GroupName;
+                groupChat.CreatedBy.Id = userGroup.CreatedBy.Id;
+                groupChat.CreatedBy.Name = userGroup.CreatedBy.Name;
+                groupChat.CreatedBy.Email = userGroup.CreatedBy.Email;
+                groupChat.CreatedBy.DateOfBirth = userGroup.CreatedBy.DateOfBirth;
+                groupChat = GetGroupMembers(groupChat, userGroup.GroupId);
+                groupChat = GetGroupConversations(groupChat, userGroup.GroupId);
+
+            }
+
+            return groupChat;
+        }
+
+        private GroupChat GetGroupConversations(GroupChat groupChat, int groupId)
         {
             var groupConversations = this.dbContext.GroupConversations
                                         .Join(
@@ -255,7 +278,7 @@ namespace DataAccessLayer
             return groupChat;
         }
 
-        private GroupChat getGroupMembers(GroupChat groupChat, int groupId)
+        private GroupChat GetGroupMembers(GroupChat groupChat, int groupId)
         {
             var groupMembers = this.dbContext.UserGroups
                                 .Join(
@@ -294,7 +317,7 @@ namespace DataAccessLayer
             return groupChat;
         }
 
-        private object getUserChatDetails(int userId)
+        private object GetUserChatDetails(int userId)
         {
 
             List<UserConversation> chatConversation = new List<UserConversation>();
@@ -355,17 +378,76 @@ namespace DataAccessLayer
             return chatConversation;
         }
 
+        private UserConversation GetUserDetails(string email)
+        {
+
+            UserConversation chatConversation = new UserConversation();
+            var query = this.dbContext.UserContacts
+                            .Join(
+                                this.dbContext.Users,
+                                userContact => userContact.UserId,
+                                user => user.Id,
+                                (userContact, user) => new
+                                {
+                                    UserId = userContact.UserId,
+                                    UserContactId = userContact.Id,
+                                    ContactId = userContact.ContactId,
+                                    ContactName = userContact.Contact.Name,
+                                    Email = userContact.Contact.Email,
+                                    DateOfBirth = userContact.Contact.DateOfBirth,
+                                    Name = userContact.Name
+                                }
+                            )
+                            .Where(x => x.Email == email)
+                            .ToList();
+
+            if (query.Count == 0)
+                query = this.dbContext.UserContacts
+                            .Join(
+                                this.dbContext.Users,
+                                userContact => userContact.ContactId,
+                                user => user.Id,
+                                (userContact, user) => new
+                                {
+                                    UserId = userContact.ContactId,
+                                    UserContactId = userContact.Id,
+                                    ContactId = userContact.UserId,
+                                    ContactName = userContact.User.Name,
+                                    Email = userContact.User.Email,
+                                    DateOfBirth = userContact.User.DateOfBirth,
+                                    Name = userContact.Name
+                                }
+                            )
+                            .Where(x => x.Email == email)
+                            .ToList();
+
+            foreach (var data in query)
+            {
+                chatConversation = new UserConversation();
+                chatConversation.UserContactId = data.UserContactId;
+                chatConversation.Person.Id = data.ContactId;
+                chatConversation.Person.Name = data.ContactName;
+                chatConversation.Person.Email = data.Email;
+                chatConversation.Person.DateOfBirth = data.DateOfBirth;
+            }
+
+            chatConversation.Messages = this.dbContext.Conversations
+                .Where(x => x.UserContactId == chatConversation.UserContactId)
+                .OrderBy(x => x.MessageOn).ToList();
+            return chatConversation;
+        }
+
         public object GetUserDetails(string authorization, ref string message)
         {
             var user = this.dbContext.Users.FirstOrDefault(x => x.Token == Security.getToken(authorization));
             if (user == null)
                 message = "UnAuthorized user";
             else
-                return getDetails(user);
+                return GetDetails(user);
             return null;
         }
 
-        private object getDetails(User user)
+        private object GetDetails(User user)
         {
             UserInfo userInfo = new UserInfo();
             userInfo.Person.Id = user.Id;
@@ -376,8 +458,8 @@ namespace DataAccessLayer
             userInfo.Person.Email = user.Email;
             userInfo.Person.DateOfBirth = user.DateOfBirth;
 
-            userInfo.ChatDetails = getUserChatDetails(user.Id);
-            userInfo.GroupDetails = getUserGroupDetails(user.Id);
+            userInfo.ChatDetails = GetUserChatDetails(user.Id);
+            userInfo.GroupDetails = GetUserGroupDetails(user.Id);
             return userInfo;
         }
 
@@ -397,23 +479,32 @@ namespace DataAccessLayer
 
         public string AuthenticateUser(string email, string password)
         {
-            var user = this.dbContext.Users.FirstOrDefault(x => x.Email == email && x.Password == Security.HashSHA1WithSalt(password, email));
-            if (user == null)
-                return null;
-
-            var token = jwtAuthenticationManager.Authenticate(email, Security.HashSHA1WithSalt(password, email));
-            if (token == null)
-                return null;
-
-            var entity = this.dbContext.Users.FirstOrDefault(x => x.Id == user.Id);
-            if(entity != null)
+            try
             {
-                entity.Token = token;
-                entity.ModifiedOn = DateTime.Now;
-                this.dbContext.SaveChanges();
-            }
+                var user = this.dbContext.Users.FirstOrDefault(x => x.Email == email && x.Password == Security.HashSHA1WithSalt(password, email));
+                if (user == null)
+                    return null;
 
-            return token;
+                var token = jwtAuthenticationManager.Authenticate(email, Security.HashSHA1WithSalt(password, email));
+                if (token == null)
+                    return null;
+
+                var entity = this.dbContext.Users.FirstOrDefault(x => x.Id == user.Id);
+                if (entity != null)
+                {
+                    entity.Token = token;
+                    entity.ModifiedOn = DateTime.Now;
+                    this.dbContext.SaveChanges();
+                }
+
+                return token;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return ex.Message;
+            }
+            
         }
     }
 }

@@ -17,6 +17,7 @@ const ConversationList = (props) => {
                     conversation = {conversation} 
                     selectConversationIndex = {selectConversationIndex}/>
             )
+        return null
     })
     const groupConversationItems = !groupConversations ? '': groupConversations.map((groupConversation, index) => {
         if(groupConversation.title.includes(searchValue) || searchValue === "")
@@ -28,6 +29,7 @@ const ConversationList = (props) => {
                     selectGroupConversationIndex = {selectGroupConversationIndex}
                 />
             )
+        return null
     })
     return (
         <div id="conversation-list">
