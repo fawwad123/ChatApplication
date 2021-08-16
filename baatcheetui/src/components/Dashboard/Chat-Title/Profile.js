@@ -20,7 +20,7 @@ const Profile = (props) => {
                     setActionMenu={setActionMenu}>
                 </DropdownItem>
                 <div className="profile">
-                    <img src={person.imageUrl}/>
+                    <img src={person.imageUrl} alt='proImg'/>
                     <div className='profile-details'>
                         <div className="form-dm">
                             <div className='row'>
@@ -81,7 +81,7 @@ const Profile = (props) => {
                             </div>
                         </div>
                     </div>
-                    <button className='edit-button' style={{fontWeight:'bold'}}>Edit Profile</button>
+                    {/* <button className='edit-button' style={{fontWeight:'bold'}}>Edit Profile</button> */}
                 </div>
             </div>
         </CSSTransition>

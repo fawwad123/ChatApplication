@@ -39,10 +39,10 @@ namespace DataAccessLayer.Common
 
         public static User AuthenticateUser(BaatCheetDbContext dbContext, int userId, string token)
         {
-           return dbContext.Users.FirstOrDefault(x => x.Id == userId && x.Token == getToken(token));
+           return dbContext.Users.FirstOrDefault(x => x.Id == userId && x.Token == GetToken(token));
         }
 
-        public static string getToken(string token)
+        public static string GetToken(string token)
         {
             if (AuthenticationHeaderValue.TryParse(token, out var headerValue))
                 return headerValue.Parameter;

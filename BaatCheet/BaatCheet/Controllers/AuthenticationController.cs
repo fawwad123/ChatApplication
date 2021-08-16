@@ -49,5 +49,14 @@ namespace BaatCheet.Controllers
                 return Unauthorized("Invalid email or password");
             return Ok(response.Token);
         }
+        [HttpPost]
+        [Route("changePassword")]
+        public async Task<ActionResult> ChangePassword(string oldPassword, string newPassword, [FromHeader] string authorization)
+        {
+            var response = await mediator.Send(new ChangePassword.Query(oldPassword, newPassword, authorization));
+            if (response.Status == "UnAuthorized user")
+                return Unauthorized(response.Status);
+            return Ok(response.Status);
+        }
     }
 }

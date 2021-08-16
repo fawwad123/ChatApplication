@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { CSSTransition } from 'react-transition-group'
 import ChangePassword from './ChangePassword'
 import { DropdownItem } from './DropdownItem'
@@ -42,8 +42,8 @@ export const DropdownMenu = (props) => {
                     </DropdownItem>
                 </div>
             </CSSTransition>
-            <Profile person={person} activeMenu={activeMenu} calHeight={calHeight} setActionMenu={setActionMenu}/>
-            <ChangePassword activeMenu={activeMenu} calHeight={calHeight} setActionMenu={setActionMenu}/>
+            <Profile person={person} activeMenu={activeMenu} calHeight={calHeight} setActionMenu={setActionMenu} />
+            <ChangePassword activeMenu={activeMenu} calHeight={calHeight} setActionMenu={setActionMenu} />
             
         </div>
     )

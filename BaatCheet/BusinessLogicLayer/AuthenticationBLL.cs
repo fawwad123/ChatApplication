@@ -3,6 +3,7 @@ using BusinessLogicLayer.Model;
 using DataAccessLayer;
 using DataAccessLayer.Common;
 using DataAccessLayer.Entities;
+using System;
 using System.Threading.Tasks;
 
 namespace BusinessLogicLayer
@@ -23,6 +24,12 @@ namespace BusinessLogicLayer
             return userDAL.GetUserDetails(authorization, ref message);
             
         }
+
+        public string ChangePassword(string oldPassword, string newPassword, string token)
+        {
+            return userDAL.ChangePassword(oldPassword, newPassword, token);
+        }
+
         public string RegisterUser(UserModel userModel)
         {
             return userDAL.RegisterUser(mapper.Map<UserModel, User>(userModel));

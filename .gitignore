@@ -1,5 +1,13 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+/BaatCheet/.vs
+/BaatCheet/BaatCheet/bin
+/BaatCheet/BaatCheet/obj
+/BaatCheet/BusinessLogicLayer/bin
+/BaatCheet/BusinessLogicLayer/obj
+/BaatCheet/DataAccesslayer/bin
+/BaatCheet/DataAccesslayer/obj
+
 # dependencies
 /baatcheetui/node_modules
 /baatcheetui/.pnp

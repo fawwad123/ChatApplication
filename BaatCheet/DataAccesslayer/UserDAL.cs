@@ -59,6 +59,33 @@ namespace DataAccessLayer
             }
         }
 
+        public string ChangePassword(string oldPassword, string newPassword, string token)
+        {
+            try
+            {
+                User user = this.dbContext.Users.FirstOrDefault(x => x.Token == Security.GetToken(token));
+                if (user == null)
+                    return "UnAuthorized user";
+                else
+                {
+                    var oldPasswordHash = Security.HashSHA1WithSalt(oldPassword, user.Email);
+                    if (oldPasswordHash == user.Password)
+                    {
+                        user.Password = Security.HashSHA1WithSalt(newPassword, user.Email);
+                        this.dbContext.Update(user);
+                        this.dbContext.SaveChanges();
+                        return "Password change successfully";
+                    }
+                }
+                return "Old password not recognize";
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return ex.Message;
+            }
+        }
+
         public string GetUserContactEmail(int userContactId, int messageBy)
         {
             var query = this.dbContext.Conversations
@@ -447,7 +474,7 @@ namespace DataAccessLayer
 
         public object GetUserDetails(string authorization, ref string message)
         {
-            var user = this.dbContext.Users.FirstOrDefault(x => x.Token == Security.getToken(authorization));
+            var user = this.dbContext.Users.FirstOrDefault(x => x.Token == Security.GetToken(authorization));
             if (user == null)
                 message = "UnAuthorized user";
             else
@@ -490,7 +517,8 @@ namespace DataAccessLayer
         {
             try
             {
-                var user = this.dbContext.Users.FirstOrDefault(x => x.Email == email && x.Password == Security.HashSHA1WithSalt(password, email));
+                password = Security.HashSHA1WithSalt(password, email);
+                var user = this.dbContext.Users.FirstOrDefault(x => x.Email == email && x.Password == password);
                 if (user == null)
                     return null;
 
