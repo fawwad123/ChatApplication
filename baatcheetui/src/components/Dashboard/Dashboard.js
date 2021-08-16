@@ -250,7 +250,7 @@ const Dashboard = () => {
             return(
                 {
                     id: chatDetails.person.id,
-                    imageUrl: daryl,
+                    imageUrl: chatDetails.person.imageUrl,
                     imageAlt: chatDetails.person.name,
                     title: chatDetails.person.name,
                     date: chatDetails.messages.map(a => a.messageOn),
@@ -296,6 +296,7 @@ const Dashboard = () => {
                 setModalIsOpen={setModalIsOpen} 
                 modalIsOpen={modalIsOpen}
                 setAddContact={setAddContact}
+                person={user.person}
             />
             {messages.length > 0  && selectedId !== 0 ? <MessageList 
                 userId={person ? person.id : null} 

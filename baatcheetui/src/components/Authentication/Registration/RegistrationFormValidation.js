@@ -1,6 +1,8 @@
 export function validate(values){
     let errors = {};
 
+    if(!values.imageUrl)
+        errors.imageUrl = "Please upload image"
     if(!values.name)
         errors.name = 'Name is required';
     if(!values.firstName)

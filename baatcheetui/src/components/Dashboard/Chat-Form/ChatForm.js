@@ -69,7 +69,7 @@ const ChatForm = (props) => {
         selectedId !== 0
         ?
         <>
-        <div className="form" id="chat-form">
+        <div id="chat-form">
             <input 
                 name="message"
                 type="text" 

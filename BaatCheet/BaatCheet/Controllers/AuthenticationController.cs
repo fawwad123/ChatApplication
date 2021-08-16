@@ -45,7 +45,7 @@ namespace BaatCheet.Controllers
         public async Task<ActionResult> AuthenticateUser(string email,string password)
         {
             var response = await mediator.Send(new AuthenticateUser.Query(email, password));
-            if (response == null)
+            if (response.Token == null)
                 return Unauthorized("Invalid email or password");
             return Ok(response.Token);
         }

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import logger from 'redux-logger'
 
 const initialState = {
     isLoadingRegistration: false,
@@ -23,7 +24,8 @@ const registerSlice = createSlice({
             state.isRegistered = false;
             state.error = action.payload;
         }
-    }
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
 });
 
 const { reducer, actions } = registerSlice;

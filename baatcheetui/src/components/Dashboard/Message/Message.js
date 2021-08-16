@@ -15,9 +15,8 @@ const Message = (props) => {
     return (
         <div className={messageClassName}>
             <div className="message-content">
-                {imageThumbnail}
                 <div className="message-text">{props.messages.message}</div>
-                <div className="message-time"><Moment format="YYYY/DD/MM hh:mm:ss">{props.messages.messageOn}</Moment></div>
+                <div className="message-time"><Moment format="DD/MM/YYYY hh:mm:ss">{props.messages.messageOn}</Moment></div>
             </div>
         </div>
     )

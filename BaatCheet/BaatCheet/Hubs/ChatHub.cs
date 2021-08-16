@@ -79,7 +79,7 @@ namespace BaatCheet.Hubs
             {
                 var OldResponse = await mediator.Send(new GetConversationHashById.Query(OldUserContactId));
                 var response = await mediator.Send(new GetConversationHashById.Query(userContactId));
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, OldResponse.HashCode);
+               /* await Groups.RemoveFromGroupAsync(Context.ConnectionId, OldResponse.HashCode);*/
                 await Groups.AddToGroupAsync(Context.ConnectionId, response.HashCode);
             }
             catch(Exception ex)
@@ -93,7 +93,7 @@ namespace BaatCheet.Hubs
             {
                 var oldResponse = await mediator.Send(new GetGroupHashById.Query(OldGroupId));
                 var response = await mediator.Send(new GetGroupHashById.Query(groupId));
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, oldResponse.HashCode);
+                /*await Groups.RemoveFromGroupAsync(Context.ConnectionId, oldResponse.HashCode);*/
                 await Groups.AddToGroupAsync(Context.ConnectionId, response.HashCode);
             }
             catch(Exception ex)

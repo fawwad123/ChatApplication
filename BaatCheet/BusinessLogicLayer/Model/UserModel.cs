@@ -39,5 +39,6 @@ namespace BusinessLogicLayer.Model
         public DateTime ModifiedOn { get; set; }
         [Required(ErrorMessage = "Date of birth is required")]
         public DateTime DateOfBirth { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

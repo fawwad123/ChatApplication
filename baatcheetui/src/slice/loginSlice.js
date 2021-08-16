@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import logger from 'redux-logger'
 
 const initialState = {
     isLoadingLogin: false,
@@ -22,7 +23,8 @@ const loginSlice = createSlice({
             state.isLoadingLogin = false;
             state.error = action.payload;
         }
-    }
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
 });
 
 const {reducer, actions} = loginSlice;

@@ -21,7 +21,7 @@ const GroupConversationItem = (props) => {
             <div className="created-date" id={id}>
                 {length === -1 
                 ? ''
-                : <Moment format='YYYY/MM/DD' id={id}>{date[length]}</Moment>}
+                : <Moment format='DD/MM/YYYY' id={id}>{date[length]}</Moment>}
             </div>
             <div className="conversation-message" id={id}>{message[length]}</div>
         </div>

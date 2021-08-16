@@ -299,7 +299,8 @@ namespace DataAccessLayer
                                         Name = select.user.Name,
                                         Email = select.user.Email,
                                         DateOfBirth = select.user.DateOfBirth,
-                                        Admin = select.userGroup.IsAdmin
+                                        Admin = select.userGroup.IsAdmin,
+                                        ImageUrl = select.user.ImageUrl
                                     }
                                 );
 
@@ -310,6 +311,7 @@ namespace DataAccessLayer
                 person.Name = groupMember.Name;
                 person.DateOfBirth = groupMember.DateOfBirth;
                 person.Email = groupMember.Email;
+                person.ImageUrl = groupMember.ImageUrl;
                 groupChat.GroupMember.Add(person);
                 groupChat.IsAdmin = groupMember.Admin;
             }
@@ -334,7 +336,8 @@ namespace DataAccessLayer
                                     ContactName = userContact.Contact.Name,
                                     Email = userContact.Contact.Email,
                                     DateOfBirth = userContact.Contact.DateOfBirth,
-                                    Name = userContact.Name
+                                    Name = userContact.Name,
+                                    ImageUrl = userContact.Contact.ImageUrl
                                 }
                             )
                             .Where(x => x.UserId == userId)
@@ -354,7 +357,8 @@ namespace DataAccessLayer
                                     ContactName = userContact.User.Name,
                                     Email = userContact.User.Email,
                                     DateOfBirth = userContact.User.DateOfBirth,
-                                    Name = userContact.Name
+                                    Name = userContact.Name,
+                                    ImageUrl = userContact.User.ImageUrl
                                 }
                             )
                             .Where(x => x.UserId == userId)
@@ -368,6 +372,7 @@ namespace DataAccessLayer
                 userConversation.Person.Name = data.ContactName;
                 userConversation.Person.Email = data.Email;
                 userConversation.Person.DateOfBirth = data.DateOfBirth;
+                userConversation.Person.ImageUrl = data.ImageUrl;
                 chatConversation.Add(userConversation);
             }
 
@@ -395,7 +400,8 @@ namespace DataAccessLayer
                                     ContactName = userContact.Contact.Name,
                                     Email = userContact.Contact.Email,
                                     DateOfBirth = userContact.Contact.DateOfBirth,
-                                    Name = userContact.Name
+                                    Name = userContact.Name,
+                                    ImageUrl = userContact.Contact.ImageUrl
                                 }
                             )
                             .Where(x => x.Email == email)
@@ -415,7 +421,8 @@ namespace DataAccessLayer
                                     ContactName = userContact.User.Name,
                                     Email = userContact.User.Email,
                                     DateOfBirth = userContact.User.DateOfBirth,
-                                    Name = userContact.Name
+                                    Name = userContact.Name,
+                                    ImageUrl = userContact.User.ImageUrl
                                 }
                             )
                             .Where(x => x.Email == email)
@@ -429,6 +436,7 @@ namespace DataAccessLayer
                 chatConversation.Person.Name = data.ContactName;
                 chatConversation.Person.Email = data.Email;
                 chatConversation.Person.DateOfBirth = data.DateOfBirth;
+                chatConversation.Person.ImageUrl = data.ImageUrl;
             }
 
             chatConversation.Messages = this.dbContext.Conversations
@@ -457,6 +465,7 @@ namespace DataAccessLayer
             userInfo.Person.MiddleName = user.MiddleName;
             userInfo.Person.Email = user.Email;
             userInfo.Person.DateOfBirth = user.DateOfBirth;
+            userInfo.Person.ImageUrl = user.ImageUrl;
 
             userInfo.ChatDetails = GetUserChatDetails(user.Id);
             userInfo.GroupDetails = GetUserGroupDetails(user.Id);

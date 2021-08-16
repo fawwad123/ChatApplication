@@ -40,7 +40,7 @@ export const Authentication = () => {
         <div className="Login">
             <div className="container">
                 {isLoggedInActive && <Login containerRef={(ref) => current = ref}/>}
-                {!isLoggedInActive && <Registration changeState={changeState} containerRef={(ref) => current = ref}/>}
+                {!isLoggedInActive && <Registration containerRef={(ref) => current = ref}/>}
             </div>
             <RightSide current={current} containerRef={(ref) => rightSide = ref} onClick={() => changeState(isLoggedInActive)}/>
         </div>

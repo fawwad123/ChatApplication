@@ -20,17 +20,18 @@ const Login = (props) => {
     
     useEffect(() => {
         const fetchData = async () =>{
-            if (Object.keys(errors).length === 0 && isSubmit) {
-                dispatch(loginPending());
-                try{
+            try{
+                if (Object.keys(errors).length === 0 && isSubmit) {
+                    dispatch(loginPending());
                     const token = await userLogin({ values });
                     sessionStorage.setItem('token', token.data);
                     dispatch(loginSuccess());
                     dispatch(getUserProfile());
                     history.push('/dashboard');
-                }catch(error){
-                    dispatch(loginFailed(error))
                 }
+            }catch(error){
+                dispatch(loginFailed(error))
+                setIsSubmit(false)
             }
         }
         fetchData();
@@ -50,7 +51,7 @@ const Login = (props) => {
     return (
         <div className="base-container">
             <div className="header">Login</div>
-            {error !== '' ? <p className="alert alert-danger">{error}</p> : ''}
+            {error !== '' ? <p className="alert alert-danger">{error.data}</p> : ''}
             <div className="content">
                 <div className="image">
                     <img src={loginImage} alt='Logo'/>
