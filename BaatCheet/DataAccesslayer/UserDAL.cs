@@ -173,10 +173,11 @@ namespace DataAccessLayer
                         this.dbContext.SaveChanges();
 
                         message = "User added successfully";
+                        return GetUserDetails(email);
                     }
                 }
             }
-            return GetUserDetails(email);
+            return null;
         }
 
         private object GetUserGroupDetails(int userId)
@@ -350,7 +351,7 @@ namespace DataAccessLayer
         {
 
             List<UserConversation> chatConversation = new List<UserConversation>();
-            var query = this.dbContext.UserContacts
+            var userQuery = this.dbContext.UserContacts
                             .Join(
                                 this.dbContext.Users,
                                 userContact => userContact.UserId,
@@ -370,8 +371,8 @@ namespace DataAccessLayer
                             .Where(x => x.UserId == userId)
                             .ToList();
             
-            if(query.Count == 0)
-                query = this.dbContext.UserContacts
+
+            var contactQuery = this.dbContext.UserContacts
                             .Join(
                                 this.dbContext.Users,
                                 userContact => userContact.ContactId,
@@ -391,7 +392,18 @@ namespace DataAccessLayer
                             .Where(x => x.UserId == userId)
                             .ToList();
 
-            foreach (var data in query)
+            foreach (var data in userQuery)
+            {
+                UserConversation userConversation = new UserConversation();
+                userConversation.UserContactId = data.UserContactId;
+                userConversation.Person.Id = data.ContactId;
+                userConversation.Person.Name = data.ContactName;
+                userConversation.Person.Email = data.Email;
+                userConversation.Person.DateOfBirth = data.DateOfBirth;
+                userConversation.Person.ImageUrl = data.ImageUrl;
+                chatConversation.Add(userConversation);
+            }
+            foreach (var data in contactQuery)
             {
                 UserConversation userConversation = new UserConversation();
                 userConversation.UserContactId = data.UserContactId;

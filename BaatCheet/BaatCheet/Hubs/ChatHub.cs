@@ -120,16 +120,28 @@ namespace BaatCheet.Hubs
             try
             {
                 var response = await mediator.Send(new AddNewContact.Query(contactEmail, userId));
-                var responseHash = await mediator.Send(new GetConversationHashById.Query(response.UserConversation.UserContactId));
-                if (dictionary.TryGetValue(userId, out string connectionId))
+                if(response.UserConversation != null)
                 {
-                    await Groups.AddToGroupAsync(connectionId, responseHash.HashCode);
+                    var responseHash = await mediator.Send(new GetConversationHashById.Query(response.UserConversation.UserContactId));
+                    if (dictionary.TryGetValue(userId, out string connectionId))
+                    {
+                        await Groups.AddToGroupAsync(connectionId, responseHash.HashCode);
+                    }
+                    if (dictionary.TryGetValue(response.UserConversation.Person.Id, out connectionId))
+                    {
+                        await Groups.AddToGroupAsync(connectionId, responseHash.HashCode);
+                    }
+                    await Clients.Group(responseHash.HashCode).SendAsync("NewContact", response.UserConversation, response.Message);
                 }
-                if (dictionary.TryGetValue(response.UserConversation.Person.Id, out connectionId))
+                else
                 {
-                    await Groups.AddToGroupAsync(connectionId, responseHash.HashCode);
+                    if (dictionary.TryGetValue(userId, out string connectionId))
+                    {
+                        await Groups.AddToGroupAsync(connectionId, userId.ToString());
+                    }
+                    await Clients.Group(userId.ToString()).SendAsync("NewContact", response.UserConversation, response.Message);
                 }
-                await Clients.Group(responseHash.HashCode).SendAsync("NewContact", response.UserConversation, response.Message);
+                
             }
             catch(Exception ex)
             {

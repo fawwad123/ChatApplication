@@ -6,20 +6,18 @@ export const NavIcon = (props) => {
     
     useEffect(() => {
         document.addEventListener('mousedown', (event) => {
-            if(!menuRef.current.contains(event.target)){
+            if(menuRef.current && !menuRef.current.contains(event.target)){
                 setOpen(false)
             }
         })
     })
     
     return (
-        <div ref={menuRef}>
-            <li className='nav-item'>
+            <li ref={menuRef} className='nav-item'>
                 <a href='#' className="icon-button" onClick={() =>  setOpen(!open)}>
                     <i className="fa fa-ellipsis-v"  aria-hidden="true"></i>
                 </a>
                 {open && props.children}
             </li>
-        </div>
     )
 }

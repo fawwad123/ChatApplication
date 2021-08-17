@@ -177,10 +177,14 @@ const Dashboard = () => {
                         })
                         connection.on('NewContact', (contact, message) =>{
                             try {
-                                const updatedChat = [...latestChat.current];
-                                updatedChat[0].push(contact)
-                                setMessages(updatedChat);
-                                setModalMessage(message)
+                                if(contact != null){
+                                    const updatedChat = [...latestChat.current];
+                                    updatedChat[0].push(contact)
+                                    setMessages(updatedChat);
+                                    setModalMessage(message)
+                                }
+                                else
+                                    setModalMessage(message)
                             } catch (error) {
                                 console.error(error);
                             }
